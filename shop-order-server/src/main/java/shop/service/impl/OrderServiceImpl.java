@@ -3,10 +3,10 @@ package shop.service.impl;
 import com.alibaba.fastjson2.JSON;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import shop.dao.OrderDao;
+import shop.openfeign.OpenFeignClient;
 import shop.service.OrderService;
 import shop.shop.domain.Order;
 import shop.shop.domain.Product;
@@ -22,6 +22,8 @@ public class OrderServiceImpl implements OrderService {
     private DiscoveryClient discoveryClient;
     @Resource
     private RestTemplate restTemplate;
+    @Resource
+    private OpenFeignClient openFeignClient;
 
     @Override
     public Order createOrder(Long productId, Long userId) {
@@ -33,11 +35,13 @@ public class OrderServiceImpl implements OrderService {
         ResponseEntity<String> forEntity = restTemplate.getForEntity("http://127.0.0.1:8081/product/" + productId, String.class);
         log.info("1 ===> ", JSON.toJSONString(forEntity.getBody()));
         List<ServiceInstance> serverList = discoveryClient.getInstances("product-service");*/
-        String url = "http://product-service/product/" + productId;
-        log.info("调用服务地址===>{}", url);
-        ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
-        log.info("2 ===> {}", forEntity.getBody());
-        product = JSON.parseObject(forEntity.getBody(), Product.class);
+//        String url = "http://product-service/product/" + productId;
+//        log.info("调用服务地址===>{}", url);
+//        ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
+//        log.info("2 ===> {}", forEntity.getBody());
+//        product = JSON.parseObject(forEntity.getBody(), Product.class);
+        product = openFeignClient.findById2(productId);
+        log.info("{}", JSON.toJSONString(product));
         Order order = Order.builder().uid(userId).pid(productId)
                 .pname(product.getPname())
                 .pprice(product.getPprice())
