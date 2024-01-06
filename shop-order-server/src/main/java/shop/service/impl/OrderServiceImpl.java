@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
         String url = "http://product-service/product/" + productId;
         log.info("调用服务地址===>{}", url);
         ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
-        log.info("2 ===> ", forEntity.getBody());
+        log.info("2 ===> {}", forEntity.getBody());
         product = JSON.parseObject(forEntity.getBody(), Product.class);
         Order order = Order.builder().uid(userId).pid(productId)
                 .pname(product.getPname())
